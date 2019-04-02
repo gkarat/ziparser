@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import zipfile
 import sys
 import os
@@ -13,11 +15,11 @@ types = []
 ### Remove folder with the same ZIP name, if already exists and create once again
 def createTargetPath(archivePath):
 	if os.path.exists(archivePath):
-		print("Folder with the same name detected...\nRemoving...")
+		print("Folder with the same name as ZIP found\nRemoving...")
 		shutil.rmtree(archivePath)
 
 	os.mkdir(archivePath)
-	print ("Successfully created the directory %s " % archivePath)
+	print ("Successfully created the new directory %s" % archivePath)
 
 
 ### Copies a given file f from archive ZIP to new folder with the same name as ZIP (without creating subfolders!)
@@ -38,7 +40,7 @@ def copyFile(archive, f, fName):
 ### Checks if type of the file's content already has its folder. If not, creates it
 ### Finally, moves the file to its relying folder
 def classifyFile(typeName, targetPath, fName):
-	
+
 	if not (typeName in types):
 		os.mkdir(targetPath + "/" + typeName)
 		types.append(typeName)
@@ -92,15 +94,22 @@ def copyAndClassify(f, archive):
 	classifyFile(typeName, targetPath, fName)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
 	### Creates ZipFile object from our argv input
-	#archive = zipfile.ZipFile(sys.argv[1][:-4]+".zip", 'r')
-	archive = zipfile.ZipFile("websoubory.zip", 'r')
+	try:
+		archive = zipfile.ZipFile(sys.argv[1], 'r')
+
+	except IOError:
+		os.sys.exit("Error: File does not appear to exist.")
 
 	### By archive.filename we can find it's relative path, for ex. 'websoubory.zip'
 	createTargetPath(archive.filename[:-4])
 
 	### Goes through every item in ZIP
+	print("Processing files from %s..." % archive.filename)
+	
 	for f in archive.namelist():
 		copyAndClassify(f, archive)
+
+	print("Finished")
